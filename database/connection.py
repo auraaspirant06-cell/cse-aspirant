@@ -23,8 +23,8 @@ class DatabaseManager:
             )
             logger.info("Connected to PostgreSQL successfully.")
         except Exception as e:
-            logger.warning(f"PostgreSQL unavailable ({e}). Falling back to in-memory repository.")
-            self.pg_pool = None
+            logger.error("PostgreSQL connection failed; startup cannot continue.")
+            raise RuntimeError("Unable to connect to PostgreSQL") from e
 
         # Redis connect attempt
         try:
@@ -38,8 +38,8 @@ class DatabaseManager:
             await self.redis_client.ping()
             logger.info("Connected to Redis successfully.")
         except Exception as e:
-            logger.warning(f"Redis unavailable ({e}). Falling back to in-memory cache.")
-            self.redis_client = None
+            logger.error("Redis connection failed; startup cannot continue.")
+            raise RuntimeError("Unable to connect to Redis") from e
 
         self.is_connected = True
 

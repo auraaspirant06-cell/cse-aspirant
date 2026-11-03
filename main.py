@@ -5,7 +5,7 @@ Central Startup & Service Orchestration Module
 import asyncio
 import signal
 import sys
-from core.config import config
+from core.config import config, validate_config
 from core.logger import logger
 from core.constants import APP_NAME, APP_VERSION
 from core.context import state
@@ -20,6 +20,7 @@ class ApplicationOrchestrator:
         self._shutdown_event = asyncio.Event()
 
     async def startup(self):
+        validate_config(config)
         logger.info(f"==================================================")
         logger.info(f"   STARTING {APP_NAME} (v{APP_VERSION})")
         logger.info(f"==================================================")

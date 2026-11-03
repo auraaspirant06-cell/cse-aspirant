@@ -37,8 +37,8 @@ echo "[4/6] Configuring workspace in ${INSTALL_DIR}..."
 sudo mkdir -p "${INSTALL_DIR}"
 sudo chown -R "$USER":"$USER" "${INSTALL_DIR}"
 
-if [ ! -f "${INSTALL_DIR}/deployment/.env" ]; then
-    cp deployment/.env.example "${INSTALL_DIR}/deployment/.env"
+if [ ! -f "${INSTALL_DIR}/.env" ]; then
+    cp .env.example "${INSTALL_DIR}/.env"
     echo "Created .env file. Please edit with your BOT_TOKEN and credentials."
 fi
 
@@ -51,7 +51,7 @@ sudo systemctl enable cse-aspirant.service
 # 6. Build and Launch
 echo "[6/6] Launching CSE Aspirant production stack..."
 cd deployment
-docker compose up -d --build
+docker compose --env-file ../.env up -d --build
 
 echo "=================================================="
 echo "   CSE ASPIRANT SUCCESSFULLY DEPLOYED! 🚀"

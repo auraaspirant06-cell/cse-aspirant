@@ -10,9 +10,17 @@ import (
 
 func main() {
 	port := 8080
+	if os.Getenv("GO_ENGINE_TOKEN") == "" {
+		log.Fatal("GO_ENGINE_TOKEN must be configured before starting the Go audio engine")
+	}
 	if envPort := os.Getenv("GO_ENGINE_PORT"); envPort != "" {
 		if p, err := strconv.Atoi(envPort); err == nil {
+			if p < 1 || p > 65535 {
+				log.Fatal("GO_ENGINE_PORT must be between 1 and 65535")
+			}
 			port = p
+		} else {
+			log.Fatal("GO_ENGINE_PORT must be an integer")
 		}
 	}
 

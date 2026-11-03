@@ -4,6 +4,7 @@ CSE Aspirant - NextGen FastAPI Server
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from core.constants import APP_NAME, APP_VERSION
+from core.config import config
 from api.routes import health, keys, music, education, payments, analytics
 
 def create_app() -> FastAPI:
@@ -17,7 +18,7 @@ def create_app() -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=config.services.cors_origins or ["http://localhost:3000"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

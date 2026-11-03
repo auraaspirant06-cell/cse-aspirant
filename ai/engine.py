@@ -2,14 +2,14 @@
 CSE Aspirant - Unified AI Inference Engine
 """
 from typing import Dict, Any, Optional
-import os
 import re
+from core.config import config
 from core.logger import logger
 
 class AIEngine:
     def __init__(self):
-        self.api_key = os.getenv("AI_API_KEY", "")
-        self.provider = os.getenv("AI_PROVIDER", "hybrid")
+        self.api_key = config.services.ai_api_key
+        self.provider = config.services.ai_provider
 
     async def generate_response(self, system_prompt: str, user_prompt: str) -> str:
         # If API key configured and provider enabled, external call can be dispatched

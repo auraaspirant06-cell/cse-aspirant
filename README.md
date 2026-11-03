@@ -103,10 +103,9 @@ CSE-Aspirant/
 
 ### Run via Docker Compose
 ```bash
-cd deployment
 cp .env.example .env
 # Edit .env with your credentials
-docker compose up -d --build
+docker compose --env-file .env -f deployment/docker-compose.yml up -d --build
 ```
 
 ### Accessing Dashboards

@@ -44,14 +44,15 @@ This guide provides instructions for deploying **CSE ASPIRANT** on Ubuntu/Debian
 
 2. Configure environment credentials:
    ```bash
+   cd ..
    cp .env.example .env
    nano .env
    ```
-   Provide your Telegram `BOT_TOKEN`, `TELEGRAM_API_ID`, `TELEGRAM_API_HASH`, and `OWNER_ID`.
+   Provide the required values listed in [Environment Configuration](ENVIRONMENT.md), including Telegram, database, Redis, Go engine, security, and payment settings.
 
 3. Launch the container stack:
    ```bash
-   docker compose up -d --build
+   docker compose --env-file ../.env up -d --build
    ```
 
 4. Verify services status:

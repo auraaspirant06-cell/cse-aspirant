@@ -6,9 +6,9 @@ services:
     container_name: cse_postgres
     restart: always
     environment:
-      POSTGRES_USER: cse_admin
-      POSTGRES_PASSWORD: supersecurepassword
-      POSTGRES_DB: cse_aspirant
+      POSTGRES_USER: ${POSTGRES_USER:-cse_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      POSTGRES_DB: ${POSTGRES_DB:-cse_aspirant}
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ../database/migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -42,8 +42,10 @@ services:
     container_name: cse_go_engine
     restart: always
     command: ["/usr/local/bin/music-engine"]
+    env_file:
+      - ../.env
     environment:
-      GO_ENGINE_PORT: 8080
+      GO_ENGINE_PORT: ${GO_ENGINE_PORT:-8080}
     ports:
       - "8080:8080"
     healthcheck:
@@ -59,7 +61,7 @@ services:
     container_name: cse_aspirant_app
     restart: always
     env_file:
-      - .env
+      - ../.env
     depends_on:
       postgres:
         condition: service_healthy
