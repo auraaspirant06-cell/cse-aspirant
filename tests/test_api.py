@@ -1,11 +1,13 @@
 """
 Integration Tests for NextGen FastAPI Endpoints
 """
+import os
 import pytest
 from fastapi.testclient import TestClient
 from api.server import app
 
 client = TestClient(app)
+MASTER_API_KEY = os.environ["MASTER_API_KEY"]
 
 def test_health_check():
     res = client.get("/health")
@@ -23,7 +25,7 @@ def test_api_keys_and_access():
     # 1. Generate new API key using Master Owner Key
     gen_res = client.post(
         "/api/v1/keys/generate",
-        headers={"X-API-Key": "CSE_ASPIRANT_OWNER_KEY"},
+        headers={"X-API-Key": MASTER_API_KEY},
         json={"user_id": 101, "tier": "PRO"}
     )
     assert gen_res.status_code == 200
@@ -42,7 +44,7 @@ def test_api_keys_and_access():
     # 3. Revoke key
     revoke_res = client.post(
         "/api/v1/keys/revoke",
-        headers={"X-API-Key": "CSE_ASPIRANT_OWNER_KEY"},
+        headers={"X-API-Key": MASTER_API_KEY},
         json={"key": new_key}
     )
     assert revoke_res.status_code == 200

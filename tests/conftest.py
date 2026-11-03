@@ -5,6 +5,8 @@ import pytest
 import sys
 import os
 
+os.environ.setdefault("MASTER_API_KEY", "test-master-api-key")
+
 # Ensure the root CSE-Aspirant directory is in sys.path
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if root_dir not in sys.path:

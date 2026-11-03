@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"os/exec"
 	"strconv"
 	"sync"
@@ -21,13 +22,19 @@ type StreamSession struct {
 }
 
 type AudioStreamer struct {
-	mu       sync.RWMutex
-	sessions map[string]*StreamSession
+	mu          sync.RWMutex
+	sessions    map[string]*StreamSession
+	ffmpegPath  string
 }
 
 func NewAudioStreamer() *AudioStreamer {
+	ffmpegPath := os.Getenv("FFMPEG_PATH")
+	if ffmpegPath == "" {
+		ffmpegPath = "ffmpeg"
+	}
 	return &AudioStreamer{
-		sessions: make(map[string]*StreamSession),
+		sessions:   make(map[string]*StreamSession),
+		ffmpegPath: ffmpegPath,
 	}
 }
 
@@ -95,7 +102,7 @@ func (s *AudioStreamer) Stream(ctx context.Context, w http.ResponseWriter, sourc
 		"-f", "ogg",
 		"pipe:1",
 	)
-	cmd := exec.CommandContext(ctx, "ffmpeg", args...)
+	cmd := exec.CommandContext(ctx, s.ffmpegPath, args...)
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		return err

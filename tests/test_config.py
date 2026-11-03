@@ -16,7 +16,7 @@ REQUIRED_VALUES = {
     "REDIS_URL": "redis://localhost:6379/0",
     "GO_ENGINE_URL": "http://localhost:8080",
     "GO_ENGINE_TOKEN": "test-engine-token",
-    "JWT_SECRET": "01234567890123456789012345678901",
+    "MASTER_API_KEY": "01234567890123456789012345678901",
     "PAYMENT_UPI_ID": "merchant@example",
     "PAYMENT_MERCHANT_NAME": "Example Merchant",
     "PAYMENT_BANK_NAME": "Example Bank",
@@ -31,7 +31,8 @@ REQUIRED_VALUES = {
 @pytest.fixture
 def isolated_config(monkeypatch):
     names = set(REQUIRED_VALUES) | {
-        "SUDO_USERS", "API_HOST", "API_PORT", "GO_ENGINE_PUBLIC_URL", "CORS_ORIGINS"
+        "SUDO_USERS", "API_HOST", "API_PORT", "GO_ENGINE_PUBLIC_URL", "CORS_ORIGINS",
+        "JWT_SECRET", "FFMPEG_PATH"
     }
     for name in names:
         monkeypatch.delenv(name, raising=False)

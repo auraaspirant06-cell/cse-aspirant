@@ -57,6 +57,7 @@ class ServiceConfig:
     go_engine_url: str = field(default_factory=lambda: _env("GO_ENGINE_URL"))
     go_engine_token: str = field(default_factory=lambda: _env("GO_ENGINE_TOKEN"))
     jwt_secret: str = field(default_factory=lambda: _env("JWT_SECRET"))
+    master_api_key: str = field(default_factory=lambda: _env("MASTER_API_KEY"))
     ai_provider: str = field(default_factory=lambda: _env("AI_PROVIDER", "local"))
     ai_api_key: str = field(default_factory=lambda: _env("AI_API_KEY"))
     cors_origins: List[str] = field(default_factory=lambda: _csv_env("CORS_ORIGINS"))
@@ -100,7 +101,7 @@ def validate_config(app_config: AppConfig = None) -> None:
         "REDIS_URL": app_config.db.redis_url,
         "GO_ENGINE_URL": app_config.services.go_engine_url,
         "GO_ENGINE_TOKEN": app_config.services.go_engine_token,
-        "JWT_SECRET": app_config.services.jwt_secret,
+        "MASTER_API_KEY": app_config.services.master_api_key,
         "PAYMENT_UPI_ID": app_config.payment.upi_id,
         "PAYMENT_MERCHANT_NAME": app_config.payment.merchant_name,
         "PAYMENT_BANK_NAME": app_config.payment.bank_name,
@@ -126,8 +127,8 @@ def validate_config(app_config: AppConfig = None) -> None:
         invalid.append("GO_ENGINE_URL")
     if not _valid_url(app_config.payment.checkout_url, ("http", "https")):
         invalid.append("PAYMENT_CHECKOUT_URL")
-    if len(app_config.services.jwt_secret) < 32:
-        invalid.append("JWT_SECRET")
+    if len(app_config.services.master_api_key) < 32:
+        invalid.append("MASTER_API_KEY")
 
     if missing or invalid:
         problems = []

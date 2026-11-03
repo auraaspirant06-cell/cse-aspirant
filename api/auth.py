@@ -16,8 +16,11 @@ async def verify_api_key(x_api_key: Optional[str] = Header(None)) -> ApiKeyRecor
             detail="Missing 'X-API-Key' header."
         )
 
-    # Master Owner Key bypass
-    if config.services.jwt_secret and secrets.compare_digest(x_api_key, config.services.jwt_secret):
+    # Dedicated master API key bypass. JWT_SECRET is not used because JWT is
+    # not implemented by this project.
+    if config.services.master_api_key and secrets.compare_digest(
+        x_api_key, config.services.master_api_key
+    ):
         return ApiKeyRecord(
             key=x_api_key,
             user_id=config.bot.owner_id,
