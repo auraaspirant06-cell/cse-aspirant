@@ -48,9 +48,7 @@ Required implemented values:
 - `TELEGRAM_SESSION_STRING`
 - `OWNER_ID`
 - `DATABASE_URL`
-- `POSTGRES_USER`
 - `POSTGRES_PASSWORD`
-- `POSTGRES_DB`
 - `REDIS_URL`
 - `GO_ENGINE_URL`
 - `GO_ENGINE_TOKEN`
@@ -64,7 +62,7 @@ Required implemented values:
 - `PAYMENT_BANK_BRANCH`
 - `PAYMENT_CHECKOUT_URL`
 
-Optional implemented values include `SUDO_USERS`, `START_IMG_URL`, `API_HOST`, `API_PORT`, `GO_ENGINE_PORT`, `GO_ENGINE_PUBLIC_URL`, `CORS_ORIGINS`, `AI_PROVIDER`, `AI_API_KEY`, `VITE_API_BASE_URL`, and `VITE_API_KEY`.
+Optional implemented values include `SUDO_USERS`, `START_IMG_URL`, `GO_ENGINE_PORT`, `GO_ENGINE_PUBLIC_URL`, `FFMPEG_PATH`, `API_HOST`, `API_PORT`, `CORS_ORIGINS`, `AI_PROVIDER`, `AI_API_KEY`, `VITE_API_BASE_URL`, and `VITE_API_KEY`. `POSTGRES_USER` and `POSTGRES_DB` are optional Compose values with defaults; `POSTGRES_PASSWORD` is required by Compose.
 
 ## Credentials Kahan Se Milenge
 
