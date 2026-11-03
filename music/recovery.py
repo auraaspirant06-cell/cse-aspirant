@@ -14,10 +14,18 @@ class StreamRecoveryEngine:
         logger.warning(f"Audio stream interrupted for chat {chat_id}. Attempting auto-recovery...")
         for attempt in range(1, self.max_attempts + 1):
             try:
-                await asyncio.sleep(self.retry_delay)
-                # Verify network/stream reachable
+                import aiohttp
+
+                await asyncio.sleep(self.retry_delay * attempt)
+                timeout = aiohttp.ClientTimeout(total=5.0)
+                async with aiohttp.ClientSession(timeout=timeout) as session:
+                    async with session.get(
+                        stream_url,
+                        headers={"Range": "bytes=0-1"},
+                    ) as response:
+                        if response.status not in (200, 206):
+                            raise RuntimeError(f"stream returned HTTP {response.status}")
                 logger.info(f"Recovery attempt {attempt}/{self.max_attempts} for chat {chat_id} at pos {resume_position}s")
-                # Simulated reconnect handshake
                 return True
             except Exception as e:
                 logger.error(f"Stream recovery attempt {attempt} failed: {e}")

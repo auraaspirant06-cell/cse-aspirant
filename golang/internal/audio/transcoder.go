@@ -11,6 +11,8 @@ type TranscodeResult struct {
 	BitrateKbps int           `json:"bitrate_kbps"`
 	Duration    time.Duration `json:"duration"`
 	Status      string        `json:"status"`
+	StreamURL   string        `json:"stream_url,omitempty"`
+	StreamID    string        `json:"stream_id,omitempty"`
 }
 
 type Transcoder struct{}
@@ -23,12 +25,18 @@ func (t *Transcoder) Process(streamURL string, targetCodec string) (*TranscodeRe
 	if streamURL == "" {
 		return nil, fmt.Errorf("empty stream URL")
 	}
+	if targetCodec == "" {
+		targetCodec = "opus"
+	}
+	if targetCodec != "opus" {
+		return nil, fmt.Errorf("unsupported target codec: %s", targetCodec)
+	}
 
 	return &TranscodeResult{
 		OriginalURL: streamURL,
 		TargetCodec: targetCodec,
-		BitrateKbps: 320,
-		Duration:    180 * time.Second,
+		BitrateKbps: 128,
+		Duration:    0,
 		Status:      "READY",
 	}, nil
 }

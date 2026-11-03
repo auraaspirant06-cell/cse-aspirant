@@ -8,6 +8,32 @@ from music.queue import MusicQueue
 from music.player import GuildPlayer
 from music.search import search_engine
 
+
+class FakeAudioBackend:
+    def __init__(self):
+        self.events = []
+
+    async def start(self, chat_id, track, volume, position=0):
+        self.events.append(("start", chat_id, track.track_id, volume, position))
+
+    async def pause(self, chat_id):
+        self.events.append(("pause", chat_id))
+
+    async def resume(self, chat_id):
+        self.events.append(("resume", chat_id))
+
+    async def stop(self, chat_id):
+        self.events.append(("stop", chat_id))
+
+    async def leave(self, chat_id):
+        self.events.append(("leave", chat_id))
+
+    async def set_volume(self, chat_id, volume):
+        self.events.append(("volume", chat_id, volume))
+
+    async def seek(self, chat_id, track, volume, position):
+        self.events.append(("seek", chat_id, position))
+
 def test_music_queue_operations():
     q = MusicQueue()
     t1 = Track(title="Song 1", uri="http://audio1.mp3", duration=180, requester_id=1, requester_name="Alice")
@@ -43,7 +69,8 @@ def test_repeat_mode():
 
 @pytest.mark.asyncio
 async def test_guild_player_playback():
-    player = GuildPlayer(chat_id=1001)
+    backend = FakeAudioBackend()
+    player = GuildPlayer(chat_id=1001, backend=backend)
     t = Track(title="Study Beat", uri="http://study.mp3", duration=200, requester_id=42, requester_name="Charlie")
     
     played = await player.play(t)
@@ -65,10 +92,24 @@ async def test_guild_player_playback():
     await player.stop()
     assert player.state == "STOPPED"
     assert player.queue.current is None
+    assert backend.events[0][0] == "start"
+    assert ("pause", 1001) in backend.events
+    assert ("resume", 1001) in backend.events
+    assert ("leave", 1001) in backend.events
 
 @pytest.mark.asyncio
 async def test_music_search():
-    res = await search_engine.search("UPSC Motivation", requester_id=1, requester_name="User")
+    res = await search_engine.search("https://example.com/audio.mp3", requester_id=1, requester_name="User")
     assert len(res) > 0
-    assert "UPSC" in res[0].title
+    assert res[0].uri == "https://example.com/audio.mp3"
+
+
+@pytest.mark.asyncio
+async def test_seek_calls_audio_backend():
+    backend = FakeAudioBackend()
+    player = GuildPlayer(chat_id=1002, backend=backend)
+    track = Track("Seekable", "https://example.com/seek.ogg", 120, 1, "User")
+    await player.play(track)
+    assert await player.seek(45) == 45
+    assert ("seek", 1002, 45) in backend.events
 

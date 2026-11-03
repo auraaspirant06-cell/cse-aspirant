@@ -29,8 +29,8 @@ class MusicQueue:
         self._queue.append(track)
         logger.info(f"Added to queue: {track.title} (Duration: {track.duration}s)")
 
-    def next(self) -> Optional[Track]:
-        if self.repeat_mode == "ONE" and self._current:
+    def next(self, force: bool = False) -> Optional[Track]:
+        if self.repeat_mode == "ONE" and self._current and not force:
             return self._current
         
         if self._current:

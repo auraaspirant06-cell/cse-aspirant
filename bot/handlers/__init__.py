@@ -6,7 +6,7 @@ from bot.handlers.help import handle_help
 from bot.handlers.music_cmd import (
     handle_play, handle_pause, handle_resume, handle_skip,
     handle_previous, handle_stop, handle_queue, handle_shuffle,
-    handle_repeat, handle_volume, handle_playlist
+    handle_repeat, handle_volume, handle_seek, handle_playlist
 )
 from bot.handlers.education_cmd import (
     handle_education, handle_upsc, handle_cs, handle_ncert,
@@ -28,7 +28,7 @@ __all__ = [
     "handle_start", "handle_help",
     "handle_play", "handle_pause", "handle_resume", "handle_skip",
     "handle_previous", "handle_stop", "handle_queue", "handle_shuffle",
-    "handle_repeat", "handle_volume", "handle_playlist",
+    "handle_repeat", "handle_volume", "handle_seek", "handle_playlist",
     "handle_education", "handle_upsc", "handle_cs", "handle_ncert",
     "handle_current_affairs", "handle_pyq", "handle_quiz", "handle_planner",
     "handle_programming", "handle_lang_course",

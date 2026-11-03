@@ -78,6 +78,8 @@ class CommandRouter:
                 return await h.handle_repeat(chat_id, args)
             elif cmd in ("volume", "vol"):
                 return await h.handle_volume(chat_id, args)
+            elif cmd in ("seek", "forward"):
+                return await h.handle_seek(chat_id, args)
             elif cmd == "playlist":
                 return await h.handle_playlist(chat_id, args or "study_focus", user_id, user_name)
 

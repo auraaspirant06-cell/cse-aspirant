@@ -3,6 +3,30 @@ Unit Tests for Command Router & Multi-Prefix Callback System
 """
 import pytest
 from bot.router import router
+from music.multi_group import multi_player_manager
+
+
+class RouterAudioBackend:
+    async def start(self, chat_id, track, volume, position=0):
+        return None
+
+    async def pause(self, chat_id):
+        return None
+
+    async def resume(self, chat_id):
+        return None
+
+    async def stop(self, chat_id):
+        return None
+
+    async def leave(self, chat_id):
+        return None
+
+    async def set_volume(self, chat_id, volume):
+        return None
+
+    async def seek(self, chat_id, track, volume, position):
+        return None
 
 @pytest.mark.parametrize("prefix", ["/", "!", "."])
 def test_prefix_parsing(prefix):
@@ -15,13 +39,14 @@ def test_prefix_parsing(prefix):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("prefix", ["/", "!", "."])
 async def test_dispatch_start_and_help(prefix):
-    res_start = await router.dispatch_command(chat_id=1, user_id=10, user_name="Aspirant", text=f"{prefix}start")
+    user_id = {"/": 101, "!": 102, ".": 103}[prefix]
+    res_start = await router.dispatch_command(chat_id=1, user_id=user_id, user_name="Aspirant", text=f"{prefix}start")
     assert res_start is not None
     assert "Namaste" in res_start["text"]
     assert res_start.get("photo") == "https://i.ytimg.com/vi/9Bk5WgGfkwM/maxresdefault.jpg"
     assert "reply_markup" in res_start
 
-    res_help = await router.dispatch_command(chat_id=1, user_id=10, user_name="Aspirant", text=f"{prefix}help")
+    res_help = await router.dispatch_command(chat_id=1, user_id=user_id, user_name="Aspirant", text=f"{prefix}help")
     assert res_help is not None
     assert "HELP CENTER" in res_help["text"]
 
@@ -45,15 +70,21 @@ async def test_help_category_callbacks():
 
 @pytest.mark.asyncio
 async def test_music_commands_dispatch():
-    res = await router.dispatch_command(chat_id=200, user_id=10, user_name="Dev", text="/play Lofi Coding Beats")
+    multi_player_manager.set_backend_factory(RouterAudioBackend)
+    res = await router.dispatch_command(
+        chat_id=200,
+        user_id=210,
+        user_name="Dev",
+        text="/play https://example.com/audio.mp3",
+    )
     assert res is not None
     assert "Now Playing" in res["text"]
 
-    pause = await router.dispatch_command(chat_id=200, user_id=10, user_name="Dev", text="!pause")
+    pause = await router.dispatch_command(chat_id=200, user_id=211, user_name="Dev", text="!pause")
     assert pause is not None
     assert "paused" in pause["text"]
 
-    resume = await router.dispatch_command(chat_id=200, user_id=10, user_name="Dev", text=".resume")
+    resume = await router.dispatch_command(chat_id=200, user_id=212, user_name="Dev", text=".resume")
     assert resume is not None
     assert "resumed" in resume["text"]
 

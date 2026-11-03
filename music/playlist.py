@@ -2,7 +2,7 @@
 CSE Aspirant - Custom & Academy Playlists
 """
 from typing import Dict, List, Optional
-from music.track import Track
+from .track import Track
 import uuid
 
 class PlaylistManager:

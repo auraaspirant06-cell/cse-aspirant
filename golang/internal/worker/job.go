@@ -12,6 +12,7 @@ type AudioJob struct {
 	URL      string
 	Action   string
 	ResultCh chan error
+	Run      func(context.Context) error
 }
 
 func (j *AudioJob) ID() string {
@@ -19,6 +20,8 @@ func (j *AudioJob) ID() string {
 }
 
 func (j *AudioJob) Execute(ctx context.Context) error {
-	// Worker processes audio chunk or stream health
-	return nil
+	if j.Run == nil {
+		return nil
+	}
+	return j.Run(ctx)
 }

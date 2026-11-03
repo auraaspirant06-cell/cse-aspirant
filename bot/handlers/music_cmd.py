@@ -6,6 +6,7 @@ from music.multi_group import multi_player_manager
 from music.search import search_engine
 from music.playlist import playlist_manager
 from bot.keyboards.inline import inline_kb
+from music.backend import AudioBackendError
 
 async def handle_play(chat_id: int, user_id: int, user_name: str, query: str) -> Dict[str, Any]:
     if not query:
@@ -16,7 +17,10 @@ async def handle_play(chat_id: int, user_id: int, user_name: str, query: str) ->
         return {"text": "❌ No audio found for your query. Try another keyword or URL."}
 
     player = multi_player_manager.get_player(chat_id)
-    track = await player.play(tracks[0])
+    try:
+        track = await player.play(tracks[0])
+    except AudioBackendError as exc:
+        return {"text": f"⚠️ Audio playback failed: {exc}"}
     
     text = (
         f"🎶 **Now Playing:** [{track.title}]({track.uri})\n"
@@ -30,17 +34,26 @@ async def handle_play(chat_id: int, user_id: int, user_name: str, query: str) ->
 
 async def handle_pause(chat_id: int) -> Dict[str, Any]:
     player = multi_player_manager.get_player(chat_id)
-    ok = await player.pause()
+    try:
+        ok = await player.pause()
+    except AudioBackendError as exc:
+        return {"text": f"⚠️ Pause failed: {exc}"}
     return {"text": "⏸ Playback paused." if ok else "⚠️ No audio is currently playing."}
 
 async def handle_resume(chat_id: int) -> Dict[str, Any]:
     player = multi_player_manager.get_player(chat_id)
-    ok = await player.resume()
+    try:
+        ok = await player.resume()
+    except AudioBackendError as exc:
+        return {"text": f"⚠️ Resume failed: {exc}"}
     return {"text": "▶ Playback resumed." if ok else "⚠️ Player is not paused."}
 
 async def handle_skip(chat_id: int) -> Dict[str, Any]:
     player = multi_player_manager.get_player(chat_id)
-    next_t = await player.skip()
+    try:
+        next_t = await player.skip()
+    except AudioBackendError as exc:
+        return {"text": f"⚠️ Skip failed: {exc}"}
     if next_t:
         return {
             "text": f"⏭ **Skipped!** Now Playing: {next_t.title}",
@@ -50,7 +63,10 @@ async def handle_skip(chat_id: int) -> Dict[str, Any]:
 
 async def handle_previous(chat_id: int) -> Dict[str, Any]:
     player = multi_player_manager.get_player(chat_id)
-    prev_t = await player.previous()
+    try:
+        prev_t = await player.previous()
+    except AudioBackendError as exc:
+        return {"text": f"⚠️ Previous failed: {exc}"}
     if prev_t:
         return {
             "text": f"⏮ **Playing Previous:** {prev_t.title}",
@@ -60,7 +76,10 @@ async def handle_previous(chat_id: int) -> Dict[str, Any]:
 
 async def handle_stop(chat_id: int) -> Dict[str, Any]:
     player = multi_player_manager.get_player(chat_id)
-    await player.stop()
+    try:
+        await player.stop()
+    except AudioBackendError as exc:
+        return {"text": f"⚠️ Stop failed: {exc}"}
     return {"text": "⏹ Audio playback stopped and queue cleared."}
 
 async def handle_queue(chat_id: int) -> Dict[str, Any]:
@@ -94,13 +113,28 @@ async def handle_repeat(chat_id: int, mode: str) -> Dict[str, Any]:
     player.set_repeat(mode)
     return {"text": f"🔁 Repeat mode set to: **{mode}**"}
 
+async def handle_seek(chat_id: int, position: str) -> Dict[str, Any]:
+    try:
+        seconds = int(position)
+    except ValueError:
+        return {"text": "⚠️ Use seek with seconds, for example: `/seek 90`"}
+    player = multi_player_manager.get_player(chat_id)
+    try:
+        new_position = await player.seek(seconds)
+    except (AudioBackendError, ValueError) as exc:
+        return {"text": f"⚠️ Seek failed: {exc}"}
+    return {"text": f"⏩ Playback position set to **{new_position}s**"}
+
 async def handle_volume(chat_id: int, level: str) -> Dict[str, Any]:
     try:
         vol = int(level)
     except Exception:
         vol = 100
     player = multi_player_manager.get_player(chat_id)
-    new_vol = player.set_volume(vol)
+    try:
+        new_vol = await player.set_volume_live(vol)
+    except AudioBackendError as exc:
+        return {"text": f"⚠️ Volume control failed: {exc}"}
     return {"text": f"🎚 Volume set to **{new_vol}%**"}
 
 async def handle_playlist(chat_id: int, name: str, user_id: int, user_name: str) -> Dict[str, Any]:

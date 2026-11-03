@@ -2,6 +2,8 @@ package worker
 
 import (
 	"context"
+	"fmt"
+	"log"
 	"sync"
 )
 
@@ -11,6 +13,7 @@ type WorkerPool struct {
 	wg          sync.WaitGroup
 	ctx         context.Context
 	cancel      context.CancelFunc
+	stopOnce    sync.Once
 }
 
 func NewWorkerPool(concurrency int, queueCap int) *WorkerPool {
@@ -40,17 +43,26 @@ func (wp *WorkerPool) runWorker() {
 			if !ok {
 				return
 			}
-			_ = job.Execute(wp.ctx)
+			if err := job.Execute(wp.ctx); err != nil {
+				log.Printf("audio job %s failed: %v", job.ID(), err)
+			}
 		}
 	}
 }
 
-func (wp *WorkerPool) Submit(job Job) {
-	wp.jobQueue <- job
+func (wp *WorkerPool) Submit(job Job) error {
+	select {
+	case <-wp.ctx.Done():
+		return fmt.Errorf("worker pool is stopped")
+	case wp.jobQueue <- job:
+		return nil
+	}
 }
 
 func (wp *WorkerPool) Stop() {
-	wp.cancel()
-	close(wp.jobQueue)
-	wp.wg.Wait()
+	wp.stopOnce.Do(func() {
+		wp.cancel()
+		close(wp.jobQueue)
+		wp.wg.Wait()
+	})
 }

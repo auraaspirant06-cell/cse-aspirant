@@ -22,6 +22,8 @@ func (s *EngineServer) SetupRoutes() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", s.handler.HealthHandler)
 	mux.HandleFunc("/api/v1/stream", s.handler.StreamHandler)
+	mux.HandleFunc("/api/v1/stream/", s.handler.StreamSessionHandler)
+	mux.HandleFunc("/api/v1/stream/audio", s.handler.AudioHandler)
 	return errorhandling.HTTPRecoveryMiddleware(mux)
 }
 

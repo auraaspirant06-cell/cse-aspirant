@@ -3,6 +3,7 @@ CSE Aspirant - API Authentication & Tier Verification
 """
 from fastapi import Header, HTTPException, Security, status
 from typing import Optional
+import secrets
 from core.config import config
 from database.repository import repo
 from database.models import ApiKeyRecord
@@ -16,7 +17,7 @@ async def verify_api_key(x_api_key: Optional[str] = Header(None)) -> ApiKeyRecor
         )
 
     # Master Owner Key bypass
-    if x_api_key == config.services.jwt_secret or x_api_key == "CSE_ASPIRANT_OWNER_KEY":
+    if config.services.jwt_secret and secrets.compare_digest(x_api_key, config.services.jwt_secret):
         return ApiKeyRecord(
             key=x_api_key,
             user_id=config.bot.owner_id,
