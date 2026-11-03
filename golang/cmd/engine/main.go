@@ -2,17 +2,30 @@ package main
 
 import (
 	"log"
+	"net/url"
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"cse-aspirant/golang/internal/server"
 	"cse-aspirant/golang/internal/worker"
 )
 
 func main() {
 	port := 8080
-	if os.Getenv("GO_ENGINE_TOKEN") == "" {
-		log.Fatal("GO_ENGINE_TOKEN must be configured before starting the Go audio engine")
+	token := os.Getenv("GO_ENGINE_TOKEN")
+	if len(token) < 32 {
+		log.Fatal("GO_ENGINE_TOKEN must contain at least 32 characters")
+	}
+	publicURL := os.Getenv("GO_ENGINE_PUBLIC_URL")
+	if publicURL == "" {
+		log.Fatal("GO_ENGINE_PUBLIC_URL must be configured before starting the Go audio engine")
+	}
+	parsedPublicURL, err := url.ParseRequestURI(publicURL)
+	if err != nil || parsedPublicURL.Hostname() == "" ||
+		(parsedPublicURL.Scheme != "http" && parsedPublicURL.Scheme != "https") ||
+		strings.ContainsAny(publicURL, "\r\n") {
+		log.Fatal("GO_ENGINE_PUBLIC_URL must be an HTTP(S) URL with a hostname")
 	}
 	ffmpegPath := os.Getenv("FFMPEG_PATH")
 	if ffmpegPath == "" {

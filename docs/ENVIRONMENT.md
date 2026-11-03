@@ -21,7 +21,7 @@ Yeh document project ke environment variables ka source-verified guide hai. Root
    - `OWNER_ID`: apna numeric Telegram user ID.
 3. PostgreSQL aur Redis start karke `DATABASE_URL` aur `REDIS_URL` bhariye. Production mein strong database password aur TLS-enabled URLs use karein.
    Bundled Docker PostgreSQL ke liye `POSTGRES_USER`, `POSTGRES_PASSWORD`, aur `POSTGRES_DB` bhi bhariye; `DATABASE_URL` mein wahi user/password/database rakhiye.
-4. Python bridge aur Go engine mein same `GO_ENGINE_TOKEN` rakhiye. `GO_ENGINE_URL` internal Go service URL aur `GO_ENGINE_PUBLIC_URL` users ke liye reachable URL hai. Docker runtime mein `FFMPEG_PATH=ffmpeg` rakhiye; Go startup is executable ko `PATH` mein check karta hai.
+4. Python bridge aur Go engine mein same `GO_ENGINE_TOKEN` rakhiye. Local Windows par `GO_ENGINE_URL=http://127.0.0.1:8080` rakhiye. Compose mein Python ke liye `GO_ENGINE_URL=http://golang-engine:8080` automatically use hota hai. `GO_ENGINE_PUBLIC_URL` alag hota hai: it is embedded in the audio URL consumed by PyTgCalls/Telegram and must resolve to the host's public DNS/TLS endpoint in VPS deployments. `http://127.0.0.1:8080` is only suitable for a local client on the same machine. Docker runtime mein `FFMPEG_PATH=ffmpeg` rakhiye; Go startup is executable ko `PATH` mein check karta hai.
 5. `MASTER_API_KEY` current master `X-API-Key` bypass ke liye dedicated secret hai. Isko locally generate karke replace karein:
    ```bash
    python -c "import secrets; print(secrets.token_urlsafe(48))"
@@ -36,7 +36,7 @@ Yeh document project ke environment variables ka source-verified guide hai. Root
    cd golang && go test ./...
    ```
 
-Docker Compose ke liye root se `docker compose --env-file .env -f deployment/docker-compose.yml up -d --build` chalaiye. Compose file root `.env` ko dono application containers mein pass karti hai.
+Docker Compose ke liye root se `docker compose --env-file .env -f deployment/docker-compose.yml up -d --build` chalaiye. Root `.env` mein `GO_ENGINE_TOKEN` aur a client-reachable `GO_ENGINE_PUBLIC_URL` set karna required hai; Compose supplies `http://golang-engine:8080` only for the private Python-to-Go URL.
 
 ## Manually Fill Karne Wali Values
 

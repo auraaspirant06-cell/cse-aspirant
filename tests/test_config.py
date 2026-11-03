@@ -15,7 +15,7 @@ REQUIRED_VALUES = {
     "DATABASE_URL": "postgresql://user:password@localhost:5432/testdb",
     "REDIS_URL": "redis://localhost:6379/0",
     "GO_ENGINE_URL": "http://localhost:8080",
-    "GO_ENGINE_TOKEN": "test-engine-token",
+    "GO_ENGINE_TOKEN": "t" * 32,
     "MASTER_API_KEY": "01234567890123456789012345678901",
     "PAYMENT_UPI_ID": "merchant@example",
     "PAYMENT_MERCHANT_NAME": "Example Merchant",

@@ -125,6 +125,8 @@ def validate_config(app_config: AppConfig = None) -> None:
         invalid.append("REDIS_URL")
     if not _valid_url(app_config.services.go_engine_url, ("http", "https")):
         invalid.append("GO_ENGINE_URL")
+    if len(app_config.services.go_engine_token) < 32:
+        invalid.append("GO_ENGINE_TOKEN")
     if not _valid_url(app_config.payment.checkout_url, ("http", "https")):
         invalid.append("PAYMENT_CHECKOUT_URL")
     if len(app_config.services.master_api_key) < 32:

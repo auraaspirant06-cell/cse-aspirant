@@ -6,8 +6,6 @@ services:
     container_name: cse_postgres
     restart: always
     environment:
-      GO_ENGINE_URL: ${GO_ENGINE_URL:-http://golang-engine:8080}
-      GO_ENGINE_PUBLIC_URL: ${GO_ENGINE_PUBLIC_URL:-http://golang-engine:8080}
       POSTGRES_USER: ${POSTGRES_USER:-cse_admin}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
       POSTGRES_DB: ${POSTGRES_DB:-cse_aspirant}
@@ -47,7 +45,9 @@ services:
     env_file:
       - ../.env
     environment:
-      GO_ENGINE_PORT: ${GO_ENGINE_PORT:-8080}
+      GO_ENGINE_PORT: 8080
+      GO_ENGINE_PUBLIC_URL: ${GO_ENGINE_PUBLIC_URL:?GO_ENGINE_PUBLIC_URL must be set to a client-reachable URL}
+      FFMPEG_PATH: ${FFMPEG_PATH:-ffmpeg}
     ports:
       - "8080:8080"
     healthcheck:
@@ -64,6 +64,11 @@ services:
     restart: always
     env_file:
       - ../.env
+    environment:
+      GO_ENGINE_URL: http://golang-engine:8080
+      GO_ENGINE_TOKEN: ${GO_ENGINE_TOKEN:?GO_ENGINE_TOKEN must be set}
+      API_HOST: ${API_HOST:-0.0.0.0}
+      API_PORT: ${API_PORT:-8000}
     depends_on:
       postgres:
         condition: service_healthy
