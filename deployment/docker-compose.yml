@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cse_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: cse_admin
+      POSTGRES_PASSWORD: supersecurepassword
+      POSTGRES_DB: cse_aspirant
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../database/migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cse_admin -d cse_aspirant"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: cse_redis
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  golang-engine:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+    container_name: cse_go_engine
+    restart: always
+    command: ["/usr/local/bin/music-engine"]
+    environment:
+      GO_ENGINE_PORT: 8080
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  bot-api:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+    container_name: cse_aspirant_app
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      golang-engine:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../:/app
+
+  dashboard:
+    image: nginx:alpine
+    container_name: cse_dashboard
+    restart: always
+    volumes:
+      - ../ui:/usr/share/nginx/html:ro
+    ports:
+      - "3000:80"
+
+volumes:
+  pgdata:
+  redisdata:
+

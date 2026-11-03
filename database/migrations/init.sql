@@ -1,0 +1,77 @@
+-- CSE Aspirant PostgreSQL Production Schema
+-- Version: 2.0.0
+
+CREATE TABLE IF NOT EXISTS users (
+    user_id BIGINT PRIMARY KEY,
+    username VARCHAR(255),
+    first_name VARCHAR(255) NOT NULL DEFAULT 'Aspirant',
+    tier VARCHAR(50) NOT NULL DEFAULT 'FREE',
+    is_sudo BOOLEAN NOT NULL DEFAULT FALSE,
+    is_banned BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS subscriptions (
+    id VARCHAR(64) PRIMARY KEY,
+    user_id BIGINT REFERENCES users(user_id) ON DELETE CASCADE,
+    tier VARCHAR(50) NOT NULL,
+    starts_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    payment_utr VARCHAR(100) UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+    utr VARCHAR(100) PRIMARY KEY,
+    user_id BIGINT REFERENCES users(user_id) ON DELETE CASCADE,
+    amount NUMERIC(10, 2) NOT NULL,
+    method VARCHAR(50) NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
+    screenshot_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    reconciled_at TIMESTAMP WITH TIME ZONE,
+    approved_by BIGINT
+);
+
+CREATE TABLE IF NOT EXISTS api_keys (
+    key VARCHAR(255) PRIMARY KEY,
+    user_id BIGINT REFERENCES users(user_id) ON DELETE CASCADE,
+    tier VARCHAR(50) NOT NULL,
+    rate_limit_per_minute INT NOT NULL DEFAULT 10,
+    total_requests INT NOT NULL DEFAULT 0,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS group_settings (
+    chat_id BIGINT PRIMARY KEY,
+    title VARCHAR(255),
+    welcome_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    anti_spam BOOLEAN NOT NULL DEFAULT TRUE,
+    anti_flood BOOLEAN NOT NULL DEFAULT TRUE,
+    volume INT NOT NULL DEFAULT 100,
+    repeat_mode VARCHAR(20) NOT NULL DEFAULT 'OFF'
+);
+
+CREATE TABLE IF NOT EXISTS promotions (
+    promo_id VARCHAR(64) PRIMARY KEY,
+    user_id BIGINT REFERENCES users(user_id) ON DELETE CASCADE,
+    channel_link TEXT NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    reviewed_by BIGINT
+);
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id BIGSERIAL PRIMARY KEY,
+    action VARCHAR(100) NOT NULL,
+    actor_id BIGINT NOT NULL,
+    target_id BIGINT,
+    details JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_tier ON users(tier);
+CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
+CREATE INDEX IF NOT EXISTS idx_api_keys_active ON api_keys(is_active);
