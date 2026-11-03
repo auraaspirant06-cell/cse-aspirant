@@ -1,7 +1,7 @@
 """
 CSE Aspirant - Usage Limits and Quota Enforcement
 """
-from typing import Dict
+from typing import Any, Dict
 import time
 from premium.tiers import get_tier_policy
 from error_handling.exceptions import RateLimitExceededError

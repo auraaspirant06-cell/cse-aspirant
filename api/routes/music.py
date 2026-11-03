@@ -45,7 +45,7 @@ async def skip_audio(chat_id: int, auth: ApiKeyRecord = Depends(verify_api_key))
     )
 
 @router.get("/status/{chat_id}", response_model=BaseResponse)
-async def get_player_status(chat_id: int):
+async def get_player_status(chat_id: int, auth: ApiKeyRecord = Depends(verify_api_key)):
     player = multi_player_manager.get_player(chat_id)
     return BaseResponse(data=player.get_status())
 

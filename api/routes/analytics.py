@@ -1,8 +1,10 @@
 """
 CSE Aspirant - Analytics & Metrics Endpoints
 """
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from api.schemas import BaseResponse
+from api.auth import verify_api_key
+from database.models import ApiKeyRecord
 from monitoring.metrics import metrics
 from monitoring.sys_info import sys_monitor
 from music.multi_group import multi_player_manager
@@ -10,7 +12,7 @@ from music.multi_group import multi_player_manager
 router = APIRouter(prefix="/api/v1/analytics", tags=["Analytics"])
 
 @router.get("/overview", response_model=BaseResponse)
-async def get_analytics_overview():
+async def get_analytics_overview(auth: ApiKeyRecord = Depends(verify_api_key)):
     return BaseResponse(
         data={
             "counters": metrics.counters,

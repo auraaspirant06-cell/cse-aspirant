@@ -17,7 +17,7 @@ Yeh document project ke environment variables ka source-verified guide hai. Root
 2. `.env` mein sabse pehle Telegram values bhariye:
    - `BOT_TOKEN`: `@BotFather` se bot token.
    - `TELEGRAM_API_ID` aur `TELEGRAM_API_HASH`: `https://my.telegram.org` ke API development tools se.
-   - `TELEGRAM_SESSION_STRING`: apne assistant user account ka Pyrogram session string. Isse kisi ke saath share na karein.
+   - `TELEGRAM_SESSION_STRING`: apne assistant user account ka Hydrogram session string. Isse kisi ke saath share na karein.
    - `OWNER_ID`: apna numeric Telegram user ID.
 3. PostgreSQL aur Redis start karke `DATABASE_URL` aur `REDIS_URL` bhariye. Production mein strong database password aur TLS-enabled URLs use karein.
    Bundled Docker PostgreSQL ke liye `POSTGRES_USER`, `POSTGRES_PASSWORD`, aur `POSTGRES_DB` bhi bhariye; `DATABASE_URL` mein wahi user/password/database rakhiye.
@@ -70,7 +70,7 @@ Optional implemented values include `SUDO_USERS`, `START_IMG_URL`, `GO_ENGINE_PO
 | --- | --- |
 | Telegram bot token | Telegram `@BotFather` |
 | Telegram API ID/hash | `my.telegram.org` |
-| Assistant session | Generate locally with a Pyrogram session tool using your own account |
+| Assistant session | Generate locally with a Hydrogram session tool using your own account |
 | PostgreSQL URL | Database administrator or managed PostgreSQL provider |
 | Redis URL | Redis administrator or managed Redis provider |
 | AI provider key | Only the selected provider's official dashboard; current external calls are not implemented |
@@ -84,7 +84,7 @@ Never commit `.env`, session strings, API keys, payment credentials, or database
 
 | Feature | Current environment state |
 | --- | --- |
-| Telegram, Pyrogram, assistant, PyTgCalls | Implemented through Telegram variables above; no separate PyTgCalls credential exists |
+| Telegram, Hydrogram, assistant, PyTgCalls | Implemented through Telegram variables above; no separate PyTgCalls credential exists |
 | Music and multi-group playback | Code exists; queue, worker, recovery and group limits are not env-configurable |
 | Go engine | Port, public URL and shared bearer token are implemented |
 | FFmpeg | Go executes `FFMPEG_PATH` with `exec.CommandContext`; Docker installs `ffmpeg` and Go startup checks accessibility |

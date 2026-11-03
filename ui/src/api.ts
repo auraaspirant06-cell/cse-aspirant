@@ -24,9 +24,19 @@ export class DashboardAPI {
     return headers;
   }
 
-  async fetchOverview(): Promise<SystemOverview> {
-    const res = await fetch(`${this.baseUrl}/api/v1/analytics/overview`);
+  private async parseResponse<T>(res: Response): Promise<T> {
     const json = await res.json();
+    if (!res.ok) {
+      throw new Error(json.detail || json.message || `Request failed with HTTP ${res.status}`);
+    }
+    return json;
+  }
+
+  async fetchOverview(): Promise<SystemOverview> {
+    const res = await fetch(`${this.baseUrl}/api/v1/analytics/overview`, {
+      headers: this.headers()
+    });
+    const json = await this.parseResponse<{ data: SystemOverview }>(res);
     return json.data;
   }
 
@@ -36,7 +46,7 @@ export class DashboardAPI {
       headers: this.headers(),
       body: JSON.stringify({ chat_id: chatId, query_or_url: query, requester_id: 1 })
     });
-    return res.json();
+    return this.parseResponse(res);
   }
 
   async generateApiKey(userId: number, tier: string = "PRO"): Promise<any> {
@@ -45,7 +55,7 @@ export class DashboardAPI {
       headers: this.headers(),
       body: JSON.stringify({ user_id: userId, tier })
     });
-    return res.json();
+    return this.parseResponse(res);
   }
 }
 

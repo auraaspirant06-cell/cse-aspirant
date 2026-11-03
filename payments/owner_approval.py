@@ -22,5 +22,9 @@ class OwnerApprovalWorkflow:
         logger.info(f"Owner {approver_id} approved payment UTR {utr}")
         return await activation_service.activate_and_deliver_keys(utr, approved_by=approver_id)
 
+    async def reject(self, utr: str, approver_id: int) -> bool:
+        logger.info("Owner %s rejected payment UTR %s", approver_id, utr)
+        return await activation_service.reject_payment(utr, rejected_by=approver_id)
+
 owner_approval = OwnerApprovalWorkflow()
 

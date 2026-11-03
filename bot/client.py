@@ -22,13 +22,13 @@ class BotClient:
         if not config.bot.session_string:
             raise RuntimeError("TELEGRAM_SESSION_STRING is required for voice-chat playback")
         try:
-            from pyrogram import Client, filters
-            from pyrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
+            from hydrogram import Client, filters
+            from hydrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
             from pytgcalls import PyTgCalls
             from music.telegram_backend import TelegramVoiceChatBackend
             from music.multi_group import multi_player_manager
         except ImportError as exc:
-            raise RuntimeError("Install pyrogram, tgcrypto, and py-tgcalls before starting the bot") from exc
+            raise RuntimeError("Install hydrogram, tgcrypto, and py-tgcalls before starting the bot") from exc
 
         bot_args = {
             "api_id": config.bot.api_id,
@@ -73,9 +73,24 @@ class BotClient:
             )
             await callback.answer(response["text"], show_alert=response.get("alert", False))
 
-        await app.start()
-        await assistant.start()
-        await voice_client.start()
+        app_started = False
+        assistant_started = False
+        voice_started = False
+        try:
+            await app.start()
+            app_started = True
+            await assistant.start()
+            assistant_started = True
+            await voice_client.start()
+            voice_started = True
+        except Exception:
+            if voice_started:
+                await voice_client.stop()
+            if assistant_started:
+                await assistant.stop()
+            if app_started:
+                await app.stop()
+            raise
         multi_player_manager.set_backend_factory(lambda: TelegramVoiceChatBackend(voice_client))
         self._telegram_app = app
         self._assistant_app = assistant

@@ -8,6 +8,7 @@ from core.config import config
 from database.repository import repo
 from database.models import ApiKeyRecord
 from premium.limits import quota_manager
+from error_handling.exceptions import RateLimitExceededError
 
 async def verify_api_key(x_api_key: Optional[str] = Header(None)) -> ApiKeyRecord:
     if not x_api_key:
@@ -41,7 +42,14 @@ async def verify_api_key(x_api_key: Optional[str] = Header(None)) -> ApiKeyRecor
         return record
 
     # Enforce quota based on key tier
-    quota_manager.check_api_quota(record.user_id, record.tier)
+    try:
+        quota_manager.check_api_quota(record.user_id, record.tier)
+    except RateLimitExceededError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=exc.message,
+            headers={"Retry-After": str(exc.retry_after)},
+        ) from exc
     record.total_requests += 1
     return record
 

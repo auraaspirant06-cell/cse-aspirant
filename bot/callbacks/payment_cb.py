@@ -4,17 +4,25 @@ CSE Aspirant - Payment & Promotion Callback Handlers
 from typing import Dict, Any
 from payments.owner_approval import owner_approval
 from promotion.reviewer import promotion_reviewer
+from core.config import config
 
 class PaymentCallbackHandler:
     async def handle_approval(self, callback_data: str, user_id: int) -> str:
         # Expected format: pay_approve_<utr> or pay_reject_<utr>
         parts = callback_data.split("_")
+        if len(parts) != 3 or parts[1] not in {"approve", "reject"} or not parts[2]:
+            return "Invalid payment review action."
+        if user_id != config.bot.owner_id and user_id not in config.bot.sudo_users:
+            return "⛔ Payment review is restricted to the owner or sudo users."
         action = parts[1]
         utr = parts[2]
         
         if action == "approve":
             res = await owner_approval.approve(utr, approver_id=user_id)
+            if res["status"] == "ALREADY_ACTIVE":
+                return f"ℹ️ Payment `{utr}` was already approved; no new key was issued."
             return f"✅ Payment `{utr}` Approved! User `{res['user_id']}` upgraded to {res['tier']}. Key: `{res['api_key']}`"
+        await owner_approval.reject(utr, approver_id=user_id)
         return f"❌ Payment `{utr}` Rejected."
 
 class PromoCallbackHandler:

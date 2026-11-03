@@ -12,6 +12,7 @@ import (
 	"encoding/hex"
 	"cse-aspirant/golang/internal/audio"
 	"cse-aspirant/golang/internal/errorhandling"
+	"net"
 )
 
 type ServerHandler struct {
@@ -51,6 +52,7 @@ func (h *ServerHandler) StreamHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	r.Body = http.MaxBytesReader(w, r.Body, 64*1024)
 	var req struct {
 		URL    string `json:"url"`
 		Format string `json:"format"`
@@ -58,6 +60,10 @@ func (h *ServerHandler) StreamHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, `{"error":"invalid_payload"}`, http.StatusBadRequest)
+		return
+	}
+	if err := validateRemoteURL(req.URL); err != nil {
+		http.Error(w, `{"error":"invalid_stream_url"}`, http.StatusBadRequest)
 		return
 	}
 
@@ -138,6 +144,30 @@ func (h *ServerHandler) authorized(r *http.Request) bool {
 		return false
 	}
 	return r.Header.Get("Authorization") == "Bearer "+h.token
+}
+
+func validateRemoteURL(raw string) error {
+	parsed, err := url.ParseRequestURI(raw)
+	if err != nil || parsed.Hostname() == "" {
+		return fmt.Errorf("invalid stream URL")
+	}
+	if parsed.Scheme != "http" && parsed.Scheme != "https" {
+		return fmt.Errorf("unsupported stream URL scheme")
+	}
+	host := strings.ToLower(parsed.Hostname())
+	if host == "localhost" || strings.HasSuffix(host, ".localhost") {
+		return fmt.Errorf("local stream targets are not allowed")
+	}
+	addresses, err := net.LookupIP(host)
+	if err != nil || len(addresses) == 0 {
+		return fmt.Errorf("stream host could not be resolved")
+	}
+	for _, address := range addresses {
+		if address.IsLoopback() || address.IsPrivate() || address.IsLinkLocalUnicast() || address.IsUnspecified() {
+			return fmt.Errorf("private stream targets are not allowed")
+		}
+	}
+	return nil
 }
 
 func newStreamID() (string, error) {

@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from api.server import app
 
 client = TestClient(app)
-MASTER_API_KEY = os.environ["MASTER_API_KEY"]
+MASTER_API_KEY = os.getenv("MASTER_API_KEY", "test-master-api-key")
 
 def test_health_check():
     res = client.get("/health")
@@ -75,6 +75,7 @@ def test_payment_endpoints():
     # Submission
     sub_res = client.post(
         "/api/v1/payments/submit",
+        headers={"X-API-Key": MASTER_API_KEY},
         json={"user_id": 99, "utr": "UTRAPI123456", "amount": 199.0, "method": "UPI"}
     )
     assert sub_res.status_code == 200

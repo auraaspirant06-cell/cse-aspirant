@@ -64,3 +64,17 @@ async def test_owner_approval_and_key_delivery():
     user = await repo.get_user(user_id)
     assert user.tier == "PRO"
 
+
+@pytest.mark.asyncio
+async def test_repeated_approval_does_not_issue_another_key_or_subscription():
+    utr = "UTRREPEAT123456"
+    await reconciliation_engine.process_submission(user_id=556, utr=utr, amount=199.0, method="UPI")
+
+    first = await owner_approval.approve(utr=utr, approver_id=100)
+    second = await owner_approval.approve(utr=utr, approver_id=100)
+
+    assert first["status"] == "ACTIVE"
+    assert second["status"] == "ALREADY_ACTIVE"
+    assert second["api_key"] is None
+    assert len(repo._subscriptions) == 1
+

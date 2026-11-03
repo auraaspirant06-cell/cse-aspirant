@@ -9,6 +9,13 @@ export function updateMetricCard(elementId: string, value: string | number) {
 }
 
 export function renderKeyBadge(key: string): string {
-  return `<span style="padding: 6px 12px; background: #1e293b; border-radius: 6px; border: 1px solid #334155;">🔑 ${key}</span>`;
+  const escapedKey = key.replace(/[&<>'"]/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "'": "&#39;",
+    '"': "&quot;"
+  }[character] || character));
+  return `<span style="padding: 6px 12px; background: #1e293b; border-radius: 6px; border: 1px solid #334155;">🔑 ${escapedKey}</span>`;
 }
 

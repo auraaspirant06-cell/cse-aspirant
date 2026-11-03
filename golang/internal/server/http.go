@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"time"
 	"cse-aspirant/golang/internal/errorhandling"
 )
 
@@ -28,5 +29,13 @@ func (s *EngineServer) SetupRoutes() http.Handler {
 }
 
 func (s *EngineServer) ListenAndServe() error {
-	return http.ListenAndServe(s.addr, s.SetupRoutes())
+	server := &http.Server{
+		Addr:              s.addr,
+		Handler:           s.SetupRoutes(),
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      5 * time.Minute,
+		IdleTimeout:       60 * time.Second,
+	}
+	return server.ListenAndServe()
 }

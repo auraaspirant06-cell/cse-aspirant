@@ -2,7 +2,7 @@
 CSE Aspirant - API Request and Response Schemas
 """
 from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Literal, Optional
 
 class BaseResponse(BaseModel):
     success: bool = True
@@ -10,8 +10,8 @@ class BaseResponse(BaseModel):
     data: Optional[Dict[str, Any]] = None
 
 class ApiKeyCreateRequest(BaseModel):
-    user_id: int
-    tier: str = Field(default="FREE", description="FREE, PREMIUM, or PRO")
+    user_id: int = Field(gt=0)
+    tier: Literal["FREE", "PREMIUM", "PRO"] = "FREE"
 
 class ApiKeyRevokeRequest(BaseModel):
     key: str
@@ -23,10 +23,10 @@ class MusicPlayRequest(BaseModel):
     requester_name: str = "API User"
 
 class PaymentSubmitRequest(BaseModel):
-    user_id: int
-    utr: str
-    amount: float
-    method: str = "UPI"
+    user_id: int = Field(gt=0)
+    utr: str = Field(min_length=10, max_length=22, pattern=r"^[A-Za-z0-9]+$")
+    amount: float = Field(gt=0, le=1_000_000)
+    method: Literal["UPI", "NEFT", "CARD"] = "UPI"
     screenshot_url: Optional[str] = None
 
 class AIQueryRequest(BaseModel):

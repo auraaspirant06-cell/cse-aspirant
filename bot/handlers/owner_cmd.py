@@ -40,6 +40,8 @@ async def handle_manual_approve_utr(actor_id: int, utr: str) -> Dict[str, Any]:
         return {"text": "⛔ Access Denied: Owner or Sudo only."}
 
     res = await activation_service.activate_and_deliver_keys(utr, approved_by=actor_id)
+    if res["status"] == "ALREADY_ACTIVE":
+        return {"text": f"ℹ️ Payment `{utr}` was already approved; no new key was issued."}
     return {
         "text": (
             f"✅ **Payment Reconciled!**\n"

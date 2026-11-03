@@ -39,6 +39,9 @@ class DatabaseManager:
             logger.info("Connected to Redis successfully.")
         except Exception as e:
             logger.error("Redis connection failed; startup cannot continue.")
+            if self.pg_pool:
+                await self.pg_pool.close()
+                self.pg_pool = None
             raise RuntimeError("Unable to connect to Redis") from e
 
         self.is_connected = True
@@ -46,8 +49,10 @@ class DatabaseManager:
     async def disconnect(self):
         if self.pg_pool:
             await self.pg_pool.close()
+            self.pg_pool = None
         if self.redis_client:
             await self.redis_client.close()
+            self.redis_client = None
         self.is_connected = False
         logger.info("Database connections closed.")
 

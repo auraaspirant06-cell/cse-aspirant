@@ -5,7 +5,7 @@ aiohttp>=3.9.3
 asyncpg>=0.29.0
 redis>=5.0.3
 psutil>=5.9.8
-pyrogram==2.0.106
+hydrogram==0.2.1
 tgcrypto>=1.2.5
 py-tgcalls==3.0.0
 ntgcalls==3.0.6
